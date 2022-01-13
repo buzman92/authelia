@@ -1,0 +1,46 @@
+version: '3.3'
+services:
+  authelia:
+    image: authelia/authelia
+    volumes:
+      - authelia_conf:/config
+    ports:
+      - 9091:9091
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    environment:
+      - TZ=europe/${tmz}
+    depends_on:
+      - redis
+  redis:
+    image: bitnami/redis:latest
+    volumes:
+      - redis_data:/bitnami/redis/data
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - REDIS_PASSWORD=${RDB_PASSWORD}
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+      - TZ=europe/paris
+  mariadb:
+    image: bitnami/mariadb:latest
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+    ports:
+      - 33006:3306  
+    environment:
+      - MARIADB_PASSWORD=${MDB_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_DATABASE=${NAME_DATABASE}
+      
+volumes:
+  redis_data:
+   driver: local
+  authelia_conf:
+   driver: local
+  mariadb_data:
+   driver: local 
